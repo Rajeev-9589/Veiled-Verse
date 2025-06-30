@@ -1,6 +1,6 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { getSubscription } from '../../Backend/firestore/subscription';
-import { getCurrentUser } from '../../Backend/firebase/auth/auth'; // Your auth util
+import { createContext, useContext, useEffect, useState } from "react";
+import { getSubscription } from "../../Backend/firestore/subscription";
+import { getCurrentUser } from "../../Backend/firebase/auth/auth"; // Your auth util
 
 const SubscriptionContext = createContext();
 

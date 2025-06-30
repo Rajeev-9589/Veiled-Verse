@@ -1,4 +1,4 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import {
   getAuth,
   signInWithPopup,
@@ -7,13 +7,14 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged, // ✅ added
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import {
   getFirestore,
   doc,
   getDoc,
   setDoc,
-  serverTimestamp
+  serverTimestamp,
 } from "firebase/firestore";
 
 // Your Firebase Config
@@ -24,11 +25,11 @@ const firebaseConfig = {
   storageBucket: "ankaheeverse.firebasestorage.app",
   messagingSenderId: "222070237184",
   appId: "1:222070237184:web:574eef63e3952e0141d0e5",
-  measurementId: "G-440659PR56"
+  measurementId: "G-440659PR56",
 };
 
 // Init Firebase
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
@@ -43,7 +44,7 @@ const saveUserToFirestore = async (user, extra = {}) => {
       name: user.displayName || extra.name,
       email: user.email,
       roles: extra.roles || ["reader"],
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
     });
   }
 };
@@ -57,7 +58,12 @@ export const loginWithGoogle = async () => {
 };
 
 // Email/Password Signup
-export const signUpWithEmail = async (email, password, name, roles = ["reader"]) => {
+export const signUpWithEmail = async (
+  email,
+  password,
+  name,
+  roles = ["reader"],
+) => {
   const result = await createUserWithEmailAndPassword(auth, email, password);
   const user = result.user;
   await saveUserToFirestore(user, { name, roles });
@@ -70,6 +76,11 @@ export const loginWithEmail = async (email, password) => {
   return result.user;
 };
 
+// Password Reset
+export const resetPassword = async (email) => {
+  await sendPasswordResetEmail(auth, email);
+};
+
 // ✅ Logout
 export const logout = async () => {
   await signOut(auth);
@@ -77,10 +88,14 @@ export const logout = async () => {
 
 export const getCurrentUser = () => {
   return new Promise((resolve, reject) => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      unsubscribe(); // Clean up the listener
-      resolve(user);
-    }, reject);
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (user) => {
+        unsubscribe(); // Clean up the listener
+        resolve(user);
+      },
+      reject,
+    );
   });
 };
 // ✅ Export for Navbar auth state tracking

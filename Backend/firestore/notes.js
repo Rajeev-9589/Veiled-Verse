@@ -8,7 +8,7 @@ import {
   deleteDoc,
   serverTimestamp,
   query,
-  where
+  where,
 } from "firebase/firestore";
 
 // Add note (highlight or personal comment)
@@ -29,9 +29,9 @@ export const addNote = async ({ userId, storyId, content, highlight }) => {
 export const getNotesByStory = async (storyId) => {
   const q = query(collection(db, "notes"), where("storyId", "==", storyId));
   const snap = await getDocs(q);
-  return snap.docs.map(doc => ({
+  return snap.docs.map((doc) => ({
     id: doc.id,
-    ...doc.data()
+    ...doc.data(),
   }));
 };
 
@@ -39,9 +39,9 @@ export const getNotesByStory = async (storyId) => {
 export const getNotesByUser = async (userId) => {
   const q = query(collection(db, "notes"), where("userId", "==", userId));
   const snap = await getDocs(q);
-  return snap.docs.map(doc => ({
+  return snap.docs.map((doc) => ({
     id: doc.id,
-    ...doc.data()
+    ...doc.data(),
   }));
 };
 

@@ -21,18 +21,18 @@ export const createUser = async (uid, data) => {
 };
 // Fetch user data (roles, name, etc.) from Firestore
 export const getUserDataFromFirestore = async (uid) => {
-    try {
-      const userRef = doc(db, "users", uid);
-      const userSnap = await getDoc(userRef);
-  
-      if (userSnap.exists()) {
-        return userSnap.data();
-      } else {
-        console.warn("User not found in Firestore.");
-        return null;
-      }
-    } catch (error) {
-      console.error("Error fetching user data:", error);
+  try {
+    const userRef = doc(db, "users", uid);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      return userSnap.data();
+    } else {
+      console.warn("User not found in Firestore.");
       return null;
     }
-  };
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return null;
+  }
+};

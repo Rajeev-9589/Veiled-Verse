@@ -1,38 +1,55 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User } from "lucide-react";
+import { 
+  Menu, 
+  X, 
+  User, 
+  BookOpen, 
+  PenTool, 
+  ShoppingBag, 
+  Home,
+  Sparkles,
+  Crown,
+  LogOut,
+  Settings,
+  BarChart3,
+  Zap
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import { motion, AnimatePresence } from "framer-motion";
 import logo from "../assets/ankaheeverse.png";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth, logout } from "../../Backend/firebase/auth/auth";
+import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, userData, logout, hasPermission } = useEnhancedAuth();
 
   const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Write", path: "/write" },
-    { name: "Marketplace", path: "/marketplace" },
+    { name: "Home", path: "/", icon: Home },
+    { name: "Write", path: "/write", icon: PenTool },
+    { name: "Marketplace", path: "/marketplace", icon: ShoppingBag },
   ];
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const handleLogout = async () => {
     await logout();
-    setUser(null);
     navigate("/login");
   };
 
@@ -41,111 +58,267 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full bg-white shadow-md fixed top-0 z-50 ">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-      <Link
-  to="/"
-  className="flex items-center gap-2 font-extrabold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent transition duration-300 hover:brightness-110"
->
-  <img
-    src={logo}
-    alt="logo"
-    className="h-9 w-9 rounded-full shadow-md ring-2 ring-purple-300 hover:ring-pink-400 transition-all duration-300"
-  />
-  <div className="flex flex-col leading-tight">
-    <span className="text-xl sm:text-2xl flex items-baseline">
-    Veiled Verse
-    </span>
-    
-  </div>
-  
-</Link>
-
-
-        {/* Desktop Nav */}
-        <div className="hidden md:flex gap-6 items-center">
-          {navLinks.map((link) => (
+    <motion.nav 
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      className={`w-full fixed top-0 z-40 transition-all duration-300 ${
+        scrolled 
+          ? 'bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200/50' 
+          : 'bg-transparent'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <Link
-              key={link.name}
-              to={link.path}
-              className="text-gray-700 hover:text-purple-600 font-medium transition"
+              to="/"
+              className="flex items-center gap-3 font-extrabold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent transition duration-300 hover:brightness-110"
             >
-              {link.name}
+              <div className="relative">
+                <img
+                  src={logo}
+                  alt="logo"
+                  className="h-10 w-10 rounded-full shadow-lg ring-2 ring-purple-300 hover:ring-pink-400 transition-all duration-300"
+                />
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full opacity-80"
+                />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-xl sm:text-2xl flex items-baseline">
+                  Veiled Verse
+                  <Sparkles className="w-5 h-5 ml-1 text-purple-500" />
+                </span>
+                <span className="text-xs text-gray-500 font-normal">Storytelling Platform</span>
+              </div>
             </Link>
-          ))}
+          </motion.div>
 
-          {user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <User className="h-5 w-5 text-gray-600" />
+          {/* Desktop Nav */}
+          <div className="hidden md:flex gap-8 items-center">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              const isActive = location.pathname === link.path;
+              return (
+                <motion.div
+                  key={link.name}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link
+                    to={link.path}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                      isActive
+                        ? 'text-purple-600 bg-purple-50 border border-purple-200'
+                        : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {link.name}
+                  </Link>
+                </motion.div>
+              );
+            })}
+
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 bg-gradient-to-r from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200 overflow-hidden">
+                      {user.photoURL ? (
+                        <img 
+                          src={user.photoURL} 
+                          alt={userData?.displayName || 'User'} 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User className="h-5 w-5 text-purple-600" />
+                      )}
+                    </Button>
+                  </motion.div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 mt-2 bg-white/95 backdrop-blur-md border border-gray-200/50 shadow-xl">
+                  <div className="px-3 py-2 border-b border-gray-100">
+                    <p className="text-sm font-medium text-gray-900">{userData?.displayName || 'User'}</p>
+                    <p className="text-xs text-gray-500">{userData?.email}</p>
+                  </div>
+                  
+                  <DropdownMenuItem onClick={() => navigate("/dashboard")} className="flex items-center gap-2 cursor-pointer">
+                    <BookOpen className="w-4 h-4" />
+                    Dashboard
+                  </DropdownMenuItem>
+                  
+                  {hasPermission('write') && (
+                    <DropdownMenuItem onClick={() => navigate("/enhanced-write")} className="flex items-center gap-2 cursor-pointer">
+                      <Zap className="w-4 h-4" />
+                      Enhanced Write
+                    </DropdownMenuItem>
+                  )}
+                  
+                  <DropdownMenuItem onClick={() => navigate("/enhanced-dashboard")} className="flex items-center gap-2 cursor-pointer">
+                    <BarChart3 className="w-4 h-4" />
+                    Analytics
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                    <Settings className="w-4 h-4" />
+                    Settings
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator />
+                  
+                  <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 cursor-pointer text-red-600 hover:text-red-700">
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link to="/login">
+                  <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium">
+                    Login
+                  </Button>
+                </Link>
+              </motion.div>
+            )}
+
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link to="/subscribe">
+                <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-medium flex items-center gap-2">
+                  <Crown className="w-4 h-4" />
+                  Subscribe
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40 mt-2">
-                <DropdownMenuItem onClick={goToDashboard}>
-                  Dashboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Link to="/login">
-              <Button className="ml-2">Login</Button>
-            </Link>
-          )}
+              </Link>
+            </motion.div>
+          </div>
 
-          <Link to="/subscribe">
-            <Button className="ml-2">Subscribe</Button>
-          </Link>
-        </div>
-
-        {/* Mobile Menu Toggle */}
-        <div className="md:hidden">
-          <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
-          </Button>
+          {/* Mobile Menu Toggle */}
+          <div className="md:hidden">
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-10 h-10 bg-gradient-to-r from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200"
+              >
+                {isOpen ? <X size={20} className="text-purple-600" /> : <Menu size={20} className="text-purple-600" />}
+              </Button>
+            </motion.div>
+          </div>
         </div>
       </div>
 
       {/* Mobile Menu */}
-      {isOpen && (
-        <div className="md:hidden bg-white shadow-lg border-t">
-          <div className="flex flex-col px-4 py-3 gap-4">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                onClick={() => setIsOpen(false)}
-                className="text-gray-700 hover:text-purple-600 font-medium"
-              >
-                {link.name}
-              </Link>
-            ))}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-white/95 backdrop-blur-md shadow-lg border-t border-gray-200/50 overflow-hidden"
+          >
+            <div className="flex flex-col px-6 py-4 gap-3">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                const isActive = location.pathname === link.path;
+                return (
+                  <motion.div
+                    key={link.name}
+                    whileHover={{ x: 5 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Link
+                      to={link.path}
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-300 ${
+                        isActive
+                          ? 'text-purple-600 bg-purple-50 border border-purple-200'
+                          : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      <Icon className="w-5 h-5" />
+                      {link.name}
+                    </Link>
+                  </motion.div>
+                );
+              })}
 
-            {user ? (
-              <>
-                <Button onClick={() => { navigate("/dashboard"); setIsOpen(false); }} className="w-full mt-2">
-                  Dashboard
-                </Button>
-                <Button onClick={handleLogout} className="w-full mt-2">
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <Link to="/login">
-                <Button className="w-full mt-2">Login</Button>
-              </Link>
-            )}
+              <div className="border-t border-gray-200 pt-3 mt-2">
+                {user ? (
+                  <>
+                    <motion.div whileHover={{ x: 5 }} whileTap={{ scale: 0.95 }}>
+                      <Button 
+                        onClick={() => { navigate("/dashboard"); setIsOpen(false); }} 
+                        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium flex items-center gap-2"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        Dashboard
+                      </Button>
+                    </motion.div>
+                    
+                    {hasPermission('write') && (
+                      <motion.div whileHover={{ x: 5 }} whileTap={{ scale: 0.95 }}>
+                        <Button 
+                          onClick={() => { navigate("/enhanced-write"); setIsOpen(false); }} 
+                          className="w-full mt-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium flex items-center gap-2"
+                        >
+                          <Zap className="w-4 h-4" />
+                          Enhanced Write
+                        </Button>
+                      </motion.div>
+                    )}
+                    
+                    <motion.div whileHover={{ x: 5 }} whileTap={{ scale: 0.95 }}>
+                      <Button 
+                        onClick={() => { navigate("/enhanced-dashboard"); setIsOpen(false); }} 
+                        className="w-full mt-3 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium flex items-center gap-2"
+                      >
+                        <BarChart3 className="w-4 h-4" />
+                        Analytics
+                      </Button>
+                    </motion.div>
+                    
+                    <motion.div whileHover={{ x: 5 }} whileTap={{ scale: 0.95 }}>
+                      <Button 
+                        onClick={handleLogout} 
+                        className="w-full mt-3 bg-red-500 hover:bg-red-600 text-white font-medium flex items-center gap-2"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </Button>
+                    </motion.div>
+                  </>
+                ) : (
+                  <motion.div whileHover={{ x: 5 }} whileTap={{ scale: 0.95 }}>
+                    <Link to="/login">
+                      <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium">
+                        Login
+                      </Button>
+                    </Link>
+                  </motion.div>
+                )}
 
-            <Link to="/subscribe">
-              <Button className="w-full mt-2">Subscribe</Button>
-            </Link>
-          </div>
-        </div>
-      )}
-    </nav>
+                <motion.div whileHover={{ x: 5 }} whileTap={{ scale: 0.95 }}>
+                  <Link to="/subscribe">
+                    <Button className="w-full mt-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-medium flex items-center gap-2">
+                      <Crown className="w-4 h-4" />
+                      Subscribe
+                    </Button>
+                  </Link>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.nav>
   );
 };
 

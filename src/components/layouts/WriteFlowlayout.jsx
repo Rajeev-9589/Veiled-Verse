@@ -4,7 +4,11 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-const WriteFlowLayout = ({ children, title = "Write Flow", showBack = true }) => {
+const WriteFlowLayout = ({
+  children,
+  title = "Write Flow",
+  showBack = true,
+}) => {
   const navigate = useNavigate();
 
   return (

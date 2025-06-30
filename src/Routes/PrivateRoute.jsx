@@ -1,10 +1,10 @@
 // src/Routes/PrivateRoute.jsx
-import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useUser } from '@/contexts/UserContext';
+import React from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 
 const PrivateRoute = ({ children }) => {
-  const { user, loading } = useUser();
+  const { user, loading } = useEnhancedAuth();
   const location = useLocation();
 
   if (loading) return <div>Loading...</div>;

@@ -12,7 +12,7 @@ const firebaseConfig = {
   storageBucket: "ankaheeverse.firebasestorage.app",
   messagingSenderId: "222070237184",
   appId: "1:222070237184:web:574eef63e3952e0141d0e5",
-  measurementId: "G-440659PR56"
+  measurementId: "G-440659PR56",
 };
 
 // Initialize Firebase

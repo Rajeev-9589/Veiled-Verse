@@ -2,13 +2,13 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useUser } from "@/contexts/UserContext";
+import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../Backend/firebase/auth/auth";
 import { useNavigate } from "react-router-dom";
 
 const UpdateRole = () => {
-  const { user, userData, setUserData } = useUser();
+  const { user, userData, updateUserData } = useEnhancedAuth();
   const navigate = useNavigate();
 
   const handleBecomeWriter = async () => {
@@ -20,10 +20,9 @@ const UpdateRole = () => {
           ? userData.roles
           : [...(userData?.roles || []), "writer"],
       });
-      setUserData((prev) => ({
-        ...prev,
-        roles: [...(prev?.roles || []), "writer"],
-      }));
+      updateUserData({
+        roles: [...(userData?.roles || []), "writer"],
+      });
       alert("You're now a Writer!");
       navigate("/write");
     } catch (err) {
@@ -38,9 +37,12 @@ const UpdateRole = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <h1 className="text-4xl font-bold text-purple-700 mb-6">Want to Write Stories?</h1>
+      <h1 className="text-4xl font-bold text-purple-700 mb-6">
+        Want to Write Stories?
+      </h1>
       <p className="text-lg text-gray-700 mb-8 max-w-md">
-        Upgrade your profile to become a <strong>Writer</strong> and start publishing your own stories on AnkaheeVerse.
+        Upgrade your profile to become a <strong>Writer</strong> and start
+        publishing your own stories on AnkaheeVerse.
       </p>
       <Button onClick={handleBecomeWriter} size="lg">
         Become a Writer 🚀

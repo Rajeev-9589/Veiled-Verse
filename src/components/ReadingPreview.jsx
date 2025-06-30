@@ -16,9 +16,9 @@ const ReadingPreview = () => {
         console.log("Fetching story with ID:", id);
         const storyRef = doc(db, "stories", id);
         const docSnap = await getDoc(storyRef);
-  
+
         if (docSnap.exists()) {
-          setLoading(false)
+          setLoading(false);
           setStory(docSnap.data());
           console.log(docSnap.data());
         } else {
@@ -29,7 +29,7 @@ const ReadingPreview = () => {
         setError("Failed to fetch story");
       }
     };
-  
+
     if (id) fetchStory();
   }, [id]);
 
@@ -42,7 +42,8 @@ const ReadingPreview = () => {
   };
 
   if (loading) return <div className="text-center py-10">Loading...</div>;
-  if (error) return <div className="text-center text-red-500 py-10">{error}</div>;
+  if (error)
+    return <div className="text-center text-red-500 py-10">{error}</div>;
 
   const { title, genre, tags, isPaid, price, content, authorName } = story;
   const readingTime = calculateReadingTime(content);
@@ -108,7 +109,7 @@ const ReadingPreview = () => {
       <div className="prose prose-lg font-serif text-gray-800 max-w-none pt-6">
         <div
           dangerouslySetInnerHTML={{
-            __html: content || "<p>No content available</p>",
+            __html: sanitizeHTML(content) || "<p>No content available</p>",
           }}
         />
       </div>

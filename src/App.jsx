@@ -1,46 +1,130 @@
 import './App.css'
-import Navbar from './components/Navbar'
+import { Suspense, lazy, useState, useEffect } from 'react'
 import { Routes, Route } from "react-router-dom";
-import Home from './pages/Home';
-import SignupPage from './pages/SignupPage';
-import Login from './pages/Login';
-import Explore from './pages/Explore';
-import Write from './pages/Write';
-import Marketplace from './pages/MarketPlace';
-import Subscribe from './pages/Subscription';
-import StoryPreview from './components/Preview';
-import StoryRead from './pages/Storyread';
-import { StoryContextProvider } from './contexts/StoryContext';
 import { Toaster } from 'sonner';
-import Dashboard from './pages/Dashboard';
+import Navbar from './components/Navbar'
+import ErrorBoundary from './components/ErrorBoundary'
 import PrivateRoute from './Routes/PrivateRoute';
-import UpdateRole from './pages/UpdateRole';
+import LoadingSpinner from './components/LoadingSpinner';
+import OfflineIndicator from './components/OfflineIndicator';
+
+// Lazy load components for better performance
+const Home = lazy(() => import('./pages/Home'));
+const SignupPage = lazy(() => import('./pages/SignupPage').then(module => ({ default: module.default })));
+const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.default })));
+const Explore = lazy(() => import('./pages/Explore'));
+const Write = lazy(() => import('./pages/Write'));
+const EnhancedWrite = lazy(() => import('./pages/EnhancedWrite'));
+const Marketplace = lazy(() => import('./pages/Marketplace'));
+const Subscribe = lazy(() => import('./pages/Subscription'));
+const StoryPreview = lazy(() => import('./components/Preview'));
+const StoryRead = lazy(() => import('./pages/Storyread'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const EnhancedDashboard = lazy(() => import('./pages/EnhancedDashboard'));
+const UpdateRole = lazy(() => import('./pages/UpdateRole'));
+
+// Loading component for Suspense fallback
+const PageLoader = () => (
+  <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 flex items-center justify-center">
+    <LoadingSpinner />
+  </div>
+);
 
 function App() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   return (
-    <div className='pt-[64px]'>
-          <Navbar/>
-    <StoryContextProvider>
-    <Routes>
-      <Route path='/' element={<Home/>} />
-      <Route path='/signup' element={<SignupPage/>} />
-      <Route path='/login' element={<Login/>} />
-      {/* <Route path='/Explore' element={<Explore/>} /> */}
-      <Route path='/Dashboard' element={<PrivateRoute><Dashboard/></PrivateRoute>} />
-
-      <Route path='/Write' element={<PrivateRoute><Write/></PrivateRoute>} />
-      <Route path='/Marketplace' element={<Marketplace/>} />
-      <Route path='/subscribe' element={<Subscribe/>} />
-      <Route path='/read/:id' element={<StoryRead/>} />
-      <Route path="/update-role" element={<UpdateRole />} />
-
-      <Route path='/preview/:id' element={<StoryPreview/>} />
-    </Routes>
-    </StoryContextProvider>
-    <Toaster position="top-center" richColors />
-    </div>
+    <ErrorBoundary>
+      <OfflineIndicator />
+      <div className={isOnline ? 'pt-[64px]' : 'pt-[112px]'}>
+        <Navbar />
+        
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Public Routes */}
+            <Route path='/' element={<Home />} />
+            <Route path='/signup' element={<SignupPage />} />
+            <Route path='/login' element={<Login />} />
+            <Route path='/marketplace' element={<Marketplace />} />
+            <Route path='/subscribe' element={<Subscribe />} />
+            <Route path='/read/:id' element={<StoryRead />} />
+            <Route path='/preview/:id' element={<StoryPreview />} />
+            
+            {/* Protected Routes */}
+            <Route path='/dashboard' element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            } />
+            <Route path='/enhanced-dashboard' element={
+              <PrivateRoute>
+                <EnhancedDashboard />
+              </PrivateRoute>
+            } />
+            <Route path='/write' element={
+              <PrivateRoute>
+                <Write />
+              </PrivateRoute>
+            } />
+            <Route path='/enhanced-write' element={
+              <PrivateRoute>
+                <EnhancedWrite />
+              </PrivateRoute>
+            } />
+            <Route path='/update-role' element={
+              <PrivateRoute>
+                <UpdateRole />
+              </PrivateRoute>
+            } />
+            
+            {/* 404 Route */}
+            <Route path='*' element={<NotFound />} />
+          </Routes>
+        </Suspense>
+        
+        <Toaster 
+          position="top-center" 
+          richColors 
+          closeButton
+          duration={4000}
+          toastOptions={{
+            style: {
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+            },
+          }}
+        />
+      </div>
+    </ErrorBoundary>
   )
 }
+
+// 404 Not Found Component
+const NotFound = () => (
+  <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 flex items-center justify-center">
+    <div className="text-center">
+      <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
+      <p className="text-xl text-gray-600 mb-8">Page not found</p>
+      <a 
+        href="/" 
+        className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all"
+      >
+        Go Home
+      </a>
+    </div>
+  </div>
+);
 
 export default App

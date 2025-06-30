@@ -9,7 +9,7 @@ import {
   updateDoc,
   query,
   where,
-  serverTimestamp
+  serverTimestamp,
 } from "firebase/firestore";
 
 // Create a new story
@@ -42,9 +42,9 @@ export const getStories = async (userId = null) => {
     q = query(q, where("authorId", "==", userId));
   }
   const querySnapshot = await getDocs(q);
-  return querySnapshot.docs.map(doc => ({
+  return querySnapshot.docs.map((doc) => ({
     id: doc.id,
-    ...doc.data()
+    ...doc.data(),
   }));
 };
 
