@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 
+// Use a public endpoint for reliable connectivity check
+const CONNECTIVITY_URL = 'https://www.gstatic.com/generate_204';
+
 const useNetworkStatus = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [connectionType, setConnectionType] = useState('unknown');
@@ -13,21 +16,19 @@ const useNetworkStatus = () => {
     }
   }, []);
 
+  // Robust connectivity check using a public endpoint
   const checkConnectivity = useCallback(async () => {
     try {
       const startTime = Date.now();
-      // Use a simple endpoint that should always exist
-      const response = await fetch('/vite.svg', { 
-        method: 'HEAD',
-        cache: 'no-cache'
+      const response = await fetch(CONNECTIVITY_URL, {
+        method: 'GET',
+        cache: 'no-cache',
+        mode: 'no-cors', // allow fetch to succeed even if opaque
       });
       const endTime = Date.now();
       const latency = endTime - startTime;
-      
-      if (response.ok) {
-        return { isOnline: true, latency };
-      }
-      return { isOnline: false, latency: null };
+      // If fetch does not throw, assume online
+      return { isOnline: true, latency };
     } catch (error) {
       return { isOnline: false, latency: null };
     }
@@ -53,7 +54,6 @@ const useNetworkStatus = () => {
     // Event listeners
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
     if ('connection' in navigator) {
       navigator.connection.addEventListener('change', handleConnectionChange);
     }
@@ -69,18 +69,17 @@ const useNetworkStatus = () => {
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      
       if ('connection' in navigator) {
         navigator.connection.removeEventListener('change', handleConnectionChange);
       }
-      
       clearInterval(interval);
     };
   }, [isOnline, checkConnectionType, checkConnectivity]);
 
+  // Force a connectivity check on retry
   const retryConnection = useCallback(async () => {
     const { isOnline: onlineStatus, latency } = await checkConnectivity();
-    setIsOnline(onlineStatus);
+    setIsOnline(onlineStatus); // Always update state
     return { isOnline: onlineStatus, latency };
   }, [checkConnectivity]);
 
