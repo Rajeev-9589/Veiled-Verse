@@ -1,52 +1,15 @@
+// ErrorBoundary.jsx
 import React from "react";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null, errorInfo: null };
-  }
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    this.setState({
-      error: error,
-      errorInfo: errorInfo,
-    });
-
-    // Log error to console in development
-    if (process.env.NODE_ENV === "development") {
-      console.error("Error caught by boundary:", error, errorInfo);
-    }
-
-    // In production, you would send this to an error reporting service
-    // Example: Sentry.captureException(error, { extra: errorInfo });
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <ErrorFallback error={this.state.error} />;
-    }
-
-    return this.props.children;
-  }
-}
-
-const ErrorFallback = ({ error }) => {
+// Wrapper to use hooks in ErrorFallback
+const ErrorFallbackWithNavigate = ({ error }) => {
   const navigate = useNavigate();
 
-  const handleRetry = () => {
-    window.location.reload();
-  };
-
-  const handleGoHome = () => {
-    navigate("/");
-  };
+  const handleRetry = () => window.location.reload();
+  const handleGoHome = () => navigate("/");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
@@ -93,5 +56,32 @@ const ErrorFallback = ({ error }) => {
     </div>
   );
 };
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    this.setState({ error, errorInfo });
+
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error caught by boundary:", error, errorInfo);
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallbackWithNavigate error={this.state.error} />;
+    }
+
+    return this.props.children;
+  }
+}
 
 export default ErrorBoundary;

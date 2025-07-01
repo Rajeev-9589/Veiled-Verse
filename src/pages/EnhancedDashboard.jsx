@@ -179,7 +179,7 @@ const EnhancedDashboard = () => {
               </p>
             </div>
             <Button
-              onClick={() => navigate("/enhanced-write")}
+              onClick={() => navigate("/write")}
               className="gap-2"
             >
               <Plus className="w-4 h-4" />

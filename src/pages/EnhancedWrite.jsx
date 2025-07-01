@@ -262,7 +262,7 @@ const EnhancedWrite = () => {
 
           {/* Editor */}
           <div className="lg:col-span-3">
-            <EnhancedStoryEditor storyId={storyId} onPublish={handlePublish} />
+            <EnhancedStoryEditor storyId={storyId} onPublish={handlePublish}  />
           </div>
         </div>
       </div>

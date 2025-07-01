@@ -560,45 +560,50 @@ const EnhancedSignupPage = () => {
                           const Icon = role.icon;
                           return (
                             <div
-                              key={role.id}
-                              className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                                roles.includes(role.id)
-                                  ? "border-purple-500 bg-purple-50"
-                                  : "border-gray-200 hover:border-gray-300"
-                              }`}
-                              onClick={() => handleRoleChange(role.id)}
-                            >
-                              <div className="flex items-start space-x-3">
-                                <Checkbox
-                                  checked={roles.includes(role.id)}
-                                  onCheckedChange={() =>
-                                    handleRoleChange(role.id)
-                                  }
-                                />
-                                <div className="flex-1">
-                                  <div className="flex items-center space-x-2">
-                                    <Icon className="w-5 h-5 text-purple-600" />
-                                    <h3 className="font-medium text-gray-900">
-                                      {role.title}
-                                    </h3>
-                                  </div>
-                                  <p className="text-sm text-gray-600 mt-1">
-                                    {role.description}
-                                  </p>
-                                  <div className="mt-2 space-y-1">
-                                    {role.benefits.map((benefit, index) => (
-                                      <div
-                                        key={index}
-                                        className="flex items-center text-xs text-gray-500"
-                                      >
-                                        <FaCheckCircle className="w-3 h-3 text-green-500 mr-2" />
-                                        {benefit}
-                                      </div>
-                                    ))}
-                                  </div>
+                            key={role.id}
+                            className={`p-4 border-2 rounded-lg transition-all ${
+                              roles.includes(role.id)
+                                ? "border-purple-500 bg-purple-50"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                          >
+                            <div className="flex items-start space-x-3">
+                              <Checkbox
+                                checked={!!roles.includes(role.id)}
+                                onCheckedChange={(checked) => {
+                                  if (typeof checked !== "boolean") return;
+                          
+                                  setRoles((prev) => {
+                                    if (checked && !prev.includes(role.id)) {
+                                      return [...prev, role.id];
+                                    } else if (!checked && prev.includes(role.id)) {
+                                      return prev.filter((r) => r !== role.id);
+                                    }
+                                    return prev;
+                                  });
+                                }}
+                              />
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <Icon className="w-5 h-5 text-purple-600" />
+                                  <h3 className="font-medium text-gray-900">{role.title}</h3>
+                                </div>
+                                <p className="text-sm text-gray-600 mt-1">{role.description}</p>
+                                <div className="mt-2 space-y-1">
+                                  {role.benefits.map((benefit, index) => (
+                                    <div
+                                      key={index}
+                                      className="flex items-center text-xs text-gray-500"
+                                    >
+                                      <FaCheckCircle className="w-3 h-3 text-green-500 mr-2" />
+                                      {benefit}
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
                             </div>
+                          </div>
+                          
                           );
                         })}
                       </div>

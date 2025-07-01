@@ -155,22 +155,11 @@ const Navbar = () => {
                   </DropdownMenuItem>
                   
                   {hasPermission('write') && (
-                    <DropdownMenuItem onClick={() => navigate("/enhanced-write")} className="flex items-center gap-2 cursor-pointer">
+                    <DropdownMenuItem onClick={() => navigate("/write")} className="flex items-center gap-2 cursor-pointer">
                       <Zap className="w-4 h-4" />
-                      Enhanced Write
+                     Write a story
                     </DropdownMenuItem>
                   )}
-                  
-                  <DropdownMenuItem onClick={() => navigate("/enhanced-dashboard")} className="flex items-center gap-2 cursor-pointer">
-                    <BarChart3 className="w-4 h-4" />
-                    Analytics
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-                    <Settings className="w-4 h-4" />
-                    Settings
-                  </DropdownMenuItem>
-                  
                   <DropdownMenuSeparator />
                   
                   <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 cursor-pointer text-red-600 hover:text-red-700">

@@ -12,14 +12,11 @@ import OfflineIndicator from './components/OfflineIndicator';
 const Home = lazy(() => import('./pages/Home'));
 const SignupPage = lazy(() => import('./pages/SignupPage').then(module => ({ default: module.default })));
 const Login = lazy(() => import('./pages/Login').then(module => ({ default: module.default })));
-const Explore = lazy(() => import('./pages/Explore'));
-const Write = lazy(() => import('./pages/Write'));
 const EnhancedWrite = lazy(() => import('./pages/EnhancedWrite'));
 const Marketplace = lazy(() => import('./pages/Marketplace'));
 const Subscribe = lazy(() => import('./pages/Subscription'));
 const StoryPreview = lazy(() => import('./components/Preview'));
 const StoryRead = lazy(() => import('./pages/Storyread'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
 const EnhancedDashboard = lazy(() => import('./pages/EnhancedDashboard'));
 const UpdateRole = lazy(() => import('./pages/UpdateRole'));
 
@@ -60,24 +57,14 @@ function App() {
             <Route path='/subscribe' element={<Subscribe />} />
             <Route path='/read/:id' element={<StoryRead />} />
             <Route path='/preview/:id' element={<StoryPreview />} />
-            
-            {/* Protected Routes */}
+    
+
             <Route path='/dashboard' element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            } />
-            <Route path='/enhanced-dashboard' element={
               <PrivateRoute>
                 <EnhancedDashboard />
               </PrivateRoute>
             } />
             <Route path='/write' element={
-              <PrivateRoute>
-                <Write />
-              </PrivateRoute>
-            } />
-            <Route path='/enhanced-write' element={
               <PrivateRoute>
                 <EnhancedWrite />
               </PrivateRoute>

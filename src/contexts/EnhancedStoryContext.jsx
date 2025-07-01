@@ -22,7 +22,6 @@ export const EnhancedStoryContextProvider = ({ children }) => {
 
   const { userData, hasPermission } = useEnhancedAuth();
   const { isOnline } = useNetworkStatus();
-
   // Simple stories fetch - no real-time updates for better performance
   useEffect(() => {
     const fetchStories = async () => {
@@ -106,7 +105,7 @@ export const EnhancedStoryContextProvider = ({ children }) => {
       const enhancedStoryData = {
         ...storyData,
         authorId: userData.uid,
-        authorName: userData.displayName,
+        authorName: userData.name,
         status: "published",
         views: 0,
         likes: 0,
