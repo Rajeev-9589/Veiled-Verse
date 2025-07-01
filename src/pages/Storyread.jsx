@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useEnhancedStory } from "../contexts/EnhancedStoryContext";
+import { useEnhancedAuth } from "../contexts/EnhancedAuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,20 +29,29 @@ import {
 
 const StoryRead = () => {
   const { id } = useParams();
-  const { stories, likeStory, rateStory, canReadStory, buyStory } =
+  const { stories, likeStory, rateStory, canReadStory, buyStory, incrementViewCount } =
     useEnhancedStory();
+  const { userData } = useEnhancedAuth();
   const [story, setStory] = useState(null);
   const [userRating, setUserRating] = useState(0);
   const [showRating, setShowRating] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
 
   useEffect(() => {
     const foundStory = stories.find((s) => s.id === id);
     setStory(foundStory);
-    if (foundStory) {
-      setIsLiked(foundStory.likedBy?.includes(foundStory.authorId) || false);
+    if (foundStory && userData?.uid) {
+      setIsLiked(Array.isArray(foundStory.likedBy) && foundStory.likedBy.includes(userData.uid));
     }
-  }, [id, stories]);
+    if (foundStory && canReadStory(foundStory)) {
+      const viewedKey = `viewed_story_${foundStory.id}`;
+      if (!sessionStorage.getItem(viewedKey)) {
+        incrementViewCount(foundStory.id);
+        sessionStorage.setItem(viewedKey, "true");
+      }
+    }
+  }, [id, stories, canReadStory, incrementViewCount, userData?.uid]);
 
   if (!story) {
     return (
@@ -54,9 +64,13 @@ const StoryRead = () => {
     );
   }
 
-  const handleLike = () => {
-    likeStory(story.id);
-    setIsLiked(!isLiked);
+  const handleLike = async () => {
+    if (!story) return;
+    setIsLiking(true);
+    // Optimistically update
+    setIsLiked((prev) => !prev);
+    await likeStory(story.id);
+    setIsLiking(false);
   };
 
   const handleRate = (rating) => {
@@ -175,10 +189,11 @@ const StoryRead = () => {
                     variant="outline"
                     size="sm"
                     onClick={handleLike}
+                    disabled={isLiking}
                     className={`gap-2 ${isLiked ? "text-red-500 border-red-200 bg-red-50" : ""}`}
                   >
                     <Heart
-                      className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`}
+                      className={`w-4 h-4 ${isLiked ? "fill-red-500 text-red-500" : ""}`}
                     />
                     {isLiked ? "Liked" : "Like"}
                   </Button>

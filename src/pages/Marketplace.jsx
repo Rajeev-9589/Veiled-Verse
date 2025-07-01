@@ -32,6 +32,7 @@ import {
   Crown,
   Sparkles,
 } from "lucide-react";
+import veiledVerseImg from "../assets/ankaheeverse.png";
 
 const Marketplace = () => {
   const { stories, buyStory, purchasedStories } = useEnhancedStory();
@@ -255,6 +256,15 @@ const Marketplace = () => {
                 className="group"
               >
                 <Card className="bg-white/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 h-full border-0 overflow-hidden">
+                  {/* Cover Image */}
+                  <div className="relative h-48 w-full bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden flex items-center justify-center">
+                    <img
+                      src={story.coverImage || veiledVerseImg}
+                      alt={story.title + " cover"}
+                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                      onError={e => { e.target.onerror = null; e.target.src = veiledVerseImg; }}
+                    />
+                  </div>
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-start">
                       <Badge

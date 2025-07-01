@@ -1,9 +1,10 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { getStories, getStoryById, updateStory, createStory } from "../../Backend/firestore/stories";
+import { getStories, getStoryById, updateStory, createStory, deleteStory as deleteStoryBackend } from "../../Backend/firestore/stories";
 import { getUserPurchases, purchaseStory } from "../../Backend/firestore/purchases";
 import { useEnhancedAuth } from "./EnhancedAuthContext";
 import useNetworkStatus from "@/hooks/useNetworkStatus";
 import { toast } from "sonner";
+import { addEarning } from "../../Backend/firestore/wallet";
 
 const EnhancedStoryContext = createContext();
 
@@ -62,7 +63,20 @@ export const EnhancedStoryContextProvider = ({ children }) => {
     fetchPurchased();
   }, [userData?.uid]);
 
-  // Optimized story purchase
+  // Increment view count for a story
+  const incrementViewCount = useCallback(async (storyId) => {
+    try {
+      // Optimistic update
+      setStories(prev => prev.map(story =>
+        story.id === storyId ? { ...story, views: (story.views || 0) + 1 } : story
+      ));
+      await updateStory(storyId, { views: (stories.find(s => s.id === storyId)?.views || 0) + 1 });
+    } catch (error) {
+      console.error("Error incrementing view count:", error);
+    }
+  }, [stories]);
+
+  // Optimized story purchase with purchase count and earnings
   const buyStory = useCallback(async (storyId, price) => {
     if (!userData?.uid) {
       toast.error("Please log in to purchase stories");
@@ -77,14 +91,25 @@ export const EnhancedStoryContextProvider = ({ children }) => {
     try {
       await purchaseStory(userData.uid, storyId, price);
       setPurchasedStories(prev => [...prev, storyId]);
-      
-      // Optimistic update for better UX
-      setStories(prev => prev.map(story => 
-        story.id === storyId 
-          ? { ...story, purchases: (story.purchases || 0) + 1 }
-          : story
-      ));
-      
+      // Find the story and author
+      const story = stories.find(s => s.id === storyId);
+      if (story) {
+        // Calculate earnings (70% to author)
+        const earning = Math.round((price || story.price || 0) * 0.7);
+        if (story.authorId && earning > 0) {
+          await addEarning(story.authorId, earning, "story_purchase");
+        }
+        // Update purchases and earnings count in Firestore and local state
+        await updateStory(storyId, {
+          purchases: (story.purchases || 0) + 1,
+          earnings: (story.earnings || 0) + earning,
+        });
+        setStories(prev => prev.map(s =>
+          s.id === storyId
+            ? { ...s, purchases: (s.purchases || 0) + 1, earnings: (s.earnings || 0) + earning }
+            : s
+        ));
+      }
       toast.success("Story purchased successfully!");
       return true;
     } catch (error) {
@@ -92,7 +117,7 @@ export const EnhancedStoryContextProvider = ({ children }) => {
       toast.error("Failed to purchase story");
       return false;
     }
-  }, [userData?.uid, purchasedStories]);
+  }, [userData?.uid, purchasedStories, stories]);
 
   // Optimized story creation
   const createNewStory = useCallback(async (storyData) => {
@@ -357,6 +382,21 @@ export const EnhancedStoryContextProvider = ({ children }) => {
     setOfflineActions(stored);
   }, []);
 
+  // Delete a story by ID
+  const deleteStoryById = useCallback(async (storyId) => {
+    try {
+      await deleteStoryBackend(storyId);
+      setStories(prev => prev.filter(story => story.id !== storyId));
+      setUserStories(prev => prev.filter(story => story.id !== storyId));
+      toast.success("Story deleted successfully");
+      return true;
+    } catch (error) {
+      console.error("Error deleting story:", error);
+      toast.error("Failed to delete story");
+      return false;
+    }
+  }, []);
+
   const value = {
     // State
     stories,
@@ -377,6 +417,8 @@ export const EnhancedStoryContextProvider = ({ children }) => {
     getFilteredStories,
     addOfflineAction,
     processOfflineActions,
+    incrementViewCount,
+    deleteStoryById,
     
     // Utilities
     isStoryOwner,

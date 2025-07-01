@@ -64,6 +64,11 @@ function App() {
                 <EnhancedDashboard />
               </PrivateRoute>
             } />
+            <Route path='/write/:storyId' element={
+  <PrivateRoute>
+    <EnhancedWrite />
+  </PrivateRoute>
+} />
             <Route path='/write' element={
               <PrivateRoute>
                 <EnhancedWrite />

@@ -10,6 +10,7 @@ import {
   query,
   where,
   serverTimestamp,
+  deleteDoc,
 } from "firebase/firestore";
 
 // Create a new story
@@ -55,5 +56,12 @@ export const updateStory = async (storyId, updateData) => {
     ...updateData,
     updatedAt: serverTimestamp(),
   });
+  return true;
+};
+
+// Delete a story by ID
+export const deleteStory = async (storyId) => {
+  const storyRef = doc(db, "stories", storyId);
+  await deleteDoc(storyRef);
   return true;
 };

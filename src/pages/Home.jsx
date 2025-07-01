@@ -30,6 +30,7 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "../../Backend/firebase/auth/auth";
+import veiledVerseImg from "../assets/ankaheeverse.png";
 
 const HomeComponent = () => {
   const { userData, hasPermission } = useEnhancedAuth();
@@ -453,7 +454,14 @@ const HomeComponent = () => {
                   whileHover={{ y: -5 }}
                 >
                   <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all overflow-hidden group">
-                    <div className="relative h-48 bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden">
+                    {/* Cover Image */}
+                    <div className="relative h-48 w-full bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden flex items-center justify-center">
+                      <img
+                        src={story.coverImage || veiledVerseImg}
+                        alt={story.title + " cover"}
+                        className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                        onError={e => { e.target.onerror = null; e.target.src = veiledVerseImg; }}
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                       <div className="absolute top-4 left-4">
                         <Badge className="bg-purple-600 text-white">
@@ -497,7 +505,7 @@ const HomeComponent = () => {
                         asChild
                         className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
                       >
-                        <Link to={`/story/${story.id}`}>
+                        <Link to={`/read/${story.id}`}>
                           <Play className="w-4 h-4 mr-2" />
                           Read Story
                         </Link>

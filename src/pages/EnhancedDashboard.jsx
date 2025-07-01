@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,9 @@ import {
   Download,
   Filter,
   Search,
+  ChevronDown,
+  ChevronUp,
+  Info,
 } from "lucide-react";
 import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 import { useEnhancedStory } from "@/contexts/EnhancedStoryContext";
@@ -44,6 +47,8 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { getDoc, doc } from "firebase/firestore";
+import { db } from "../../Backend/firebase/auth/auth";
 
 const EnhancedDashboard = () => {
   const navigate = useNavigate();
@@ -55,6 +60,7 @@ const EnhancedDashboard = () => {
     getFilteredStories,
     setFilters,
     filters,
+    deleteStoryById,
   } = useEnhancedStory();
 
   // Get featured and trending stories from all stories
@@ -119,17 +125,12 @@ const EnhancedDashboard = () => {
 
   // Handle story actions
   const handleEditStory = (storyId) => {
-    navigate(`/enhanced-write/${storyId}`);
+    navigate(`/write/${storyId}`);
   };
 
   const handleDeleteStory = async (storyId) => {
     if (window.confirm("Are you sure you want to delete this story?")) {
-      try {
-        // Implementation for story deletion
-        toast.success("Story deleted successfully");
-      } catch (error) {
-        toast.error("Failed to delete story");
-      }
+      await deleteStoryById(storyId);
     }
   };
 
@@ -148,6 +149,51 @@ const EnhancedDashboard = () => {
         tag.toLowerCase().includes(searchQuery.toLowerCase()),
       ),
   );
+
+  const [wallet, setWallet] = useState({
+    totalEarnings: 0,
+    paidReadEarnings: 0,
+    freeReadEarnings: 0,
+    bonusEarnings: 0,
+  });
+  const [showSplit, setShowSplit] = useState(false);
+  const splitBtnRef = useRef();
+  const splitDropdownRef = useRef();
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClick(e) {
+      if (
+        splitDropdownRef.current &&
+        !splitDropdownRef.current.contains(e.target) &&
+        splitBtnRef.current &&
+        !splitBtnRef.current.contains(e.target)
+      ) {
+        setShowSplit(false);
+      }
+    }
+    if (showSplit) {
+      document.addEventListener("mousedown", handleClick);
+    }
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showSplit]);
+
+  useEffect(() => {
+    async function fetchWallet() {
+      if (!userData?.uid) return;
+      const walletRef = doc(db, "wallets", userData.uid);
+      const walletSnap = await getDoc(walletRef);
+      if (walletSnap.exists()) {
+        setWallet({
+          totalEarnings: walletSnap.data().totalEarnings || 0,
+          paidReadEarnings: walletSnap.data().paidReadEarnings || 0,
+          freeReadEarnings: walletSnap.data().freeReadEarnings || 0,
+          bonusEarnings: walletSnap.data().bonusEarnings || 0,
+        });
+      }
+    }
+    fetchWallet();
+  }, [userData?.uid]);
 
   if (!userData) {
     return (
@@ -243,19 +289,93 @@ const EnhancedDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-md shadow-lg">
+          <Card className="bg-white/80 backdrop-blur-md shadow-lg relative overflow-visible z-[60]">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
+                  <p className="text-sm font-medium text-gray-600 mb-1 flex items-center gap-2">
                     Total Earnings
+                    <button
+                      ref={splitBtnRef}
+                      className={`ml-1 p-1 rounded-full border border-green-200 bg-white/70 shadow-sm hover:bg-green-50 focus:ring-2 focus:ring-green-300 transition flex items-center ${showSplit ? 'ring-2 ring-green-400' : ''}`}
+                      onClick={() => setShowSplit((v) => !v)}
+                      aria-label="Show earning split"
+                      tabIndex={0}
+                    >
+                      <Info className="w-4 h-4 text-green-600" />
+                      <motion.span
+                        animate={{ rotate: showSplit ? 180 : 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="ml-1"
+                      >
+                        <ChevronDown className="w-4 h-4 text-green-600" />
+                      </motion.span>
+                    </button>
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    ₹{stats.totalEarnings.toLocaleString()}
+                  <p className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                    ₹{wallet.totalEarnings.toLocaleString()}
                   </p>
                 </div>
-                <DollarSign className="h-8 w-8 text-green-600" />
+                <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
+                  <DollarSign className="w-7 h-7 text-white" />
+                </div>
               </div>
+              <AnimatePresence>
+                {showSplit && (
+                  <motion.div
+                    ref={splitDropdownRef}
+                    initial={{ opacity: 0, y: -12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.22, ease: "easeInOut" }}
+                    className="absolute left-1/2 top-full z-[999] w-80 max-w-[95vw] -translate-x-1/2 mt-3"
+                  >
+                    {/* Pointer arrow */}
+                    <div className="flex justify-center">
+                      <div className="w-6 h-6 bg-white/60 backdrop-blur border border-green-200 rounded rotate-45 -mb-3 shadow-md"></div>
+                    </div>
+                    {/* Glassy dropdown */}
+                    <div className="backdrop-blur-xl bg-white/70 border border-green-200 rounded-2xl shadow-2xl p-6 pt-4 relative overflow-hidden">
+                      {/* Gradient accent bar */}
+                      <div className="absolute left-0 top-0 w-full h-1.5 bg-gradient-to-r from-green-400 via-emerald-400 to-purple-400 rounded-t-2xl" />
+                      <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <DollarSign className="w-5 h-5 text-green-600" /> Earnings Breakdown
+                      </h4>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-2 text-base font-semibold">
+                            <span className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
+                              <DollarSign className="w-5 h-5 text-purple-600" />
+                            </span>
+                            Paid Reads
+                          </span>
+                          <span className="font-extrabold text-purple-700 text-xl">₹{wallet.paidReadEarnings.toLocaleString()}</span>
+                        </div>
+                        <div className="border-t border-gray-200" />
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-2 text-base font-semibold">
+                            <span className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                              <span className="text-blue-600 text-2xl">📘</span>
+                            </span>
+                            Free Reads
+                          </span>
+                          <span className="font-extrabold text-blue-700 text-xl">₹{wallet.freeReadEarnings.toLocaleString()}</span>
+                        </div>
+                        <div className="border-t border-gray-200" />
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-2 text-base font-semibold">
+                            <span className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
+                              <DollarSign className="w-5 h-5 text-orange-600" />
+                            </span>
+                            Bonuses
+                          </span>
+                          <span className="font-extrabold text-orange-700 text-xl">₹{wallet.bonusEarnings.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </CardContent>
           </Card>
         </motion.div>
