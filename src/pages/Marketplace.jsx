@@ -45,8 +45,10 @@ const Marketplace = () => {
   const { userData, loading: authLoading } = useEnhancedAuth();
   const [storyTab, setStoryTab] = useState("paid");
 
-  const freeStories = stories.filter((story) => !story.isPaid);
-  const paidStories = stories.filter((story) => story.isPaid);
+  // Hard filter: Only show approved stories in marketplace
+  const approvedStories = stories.filter(story => story.status === 'approved');
+  const freeStories = approvedStories.filter((story) => !story.isPaid);
+  const paidStories = approvedStories.filter((story) => story.isPaid);
 
   const genres = [
     { value: "all", label: "All Genres" },

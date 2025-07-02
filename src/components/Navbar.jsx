@@ -126,6 +126,22 @@ const Navbar = () => {
               );
             })}
 
+            {hasPermission && hasPermission('admin') && (
+              <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  to="/admin"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                    location.pathname === '/admin'
+                      ? 'text-purple-600 bg-purple-50 border border-purple-200'
+                      : 'text-gray-700 hover:text-purple-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  Admin Panel
+                </Link>
+              </motion.div>
+            )}
+
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -238,6 +254,18 @@ const Navbar = () => {
                   </motion.div>
                 );
               })}
+
+              {hasPermission && hasPermission('admin') && (
+                <motion.div whileHover={{ x: 5 }} whileTap={{ scale: 0.95 }}>
+                  <Button 
+                    onClick={() => { navigate("/admin"); setIsOpen(false); }} 
+                    className="w-full mt-3 bg-gradient-to-r from-gray-800 to-purple-800 hover:from-gray-900 hover:to-purple-900 text-white font-medium flex items-center gap-2"
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    Admin Panel
+                  </Button>
+                </motion.div>
+              )}
 
               <div className="border-t border-gray-200 pt-3 mt-2">
                 {user ? (

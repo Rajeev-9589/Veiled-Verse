@@ -18,6 +18,7 @@ export const createStory = async (storyData) => {
   const storyRef = doc(collection(db, "stories"));
   const payload = {
     ...storyData,
+    status: "pending",
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
@@ -41,6 +42,9 @@ export const getStories = async (userId = null) => {
   let q = collection(db, "stories");
   if (userId) {
     q = query(q, where("authorId", "==", userId));
+  } else {
+    // Only return approved stories for public
+    q = query(q, where("status", "==", "approved"));
   }
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map((doc) => ({
@@ -63,5 +67,25 @@ export const updateStory = async (storyId, updateData) => {
 export const deleteStory = async (storyId) => {
   const storyRef = doc(db, "stories", storyId);
   await deleteDoc(storyRef);
+  return true;
+};
+
+// Get all pending stories (for admin)
+export const getPendingStories = async () => {
+  const q = query(collection(db, "stories"), where("status", "==", "pending"));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+};
+
+// Set story status (approve/reject)
+export const setStoryStatus = async (storyId, status) => {
+  const storyRef = doc(db, "stories", storyId);
+  await updateDoc(storyRef, {
+    status,
+    updatedAt: serverTimestamp(),
+  });
   return true;
 };

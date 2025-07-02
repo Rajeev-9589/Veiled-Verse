@@ -537,12 +537,22 @@ const EnhancedDashboard = () => {
                       <div className="flex justify-between items-start mb-4">
                         <Badge
                           variant={
-                            story.publishStatus === "published"
+                            story.status === "approved"
                               ? "default"
-                              : "secondary"
+                              : story.status === "pending"
+                              ? "secondary"
+                              : story.status === "rejected"
+                              ? "destructive"
+                              : "outline"
                           }
                         >
-                          {story.publishStatus}
+                          {story.status === "approved"
+                            ? "Published"
+                            : story.status === "pending"
+                            ? "Pending"
+                            : story.status === "rejected"
+                            ? "Rejected"
+                            : story.status || "Unknown"}
                         </Badge>
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button

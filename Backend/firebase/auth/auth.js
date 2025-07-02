@@ -102,3 +102,4 @@ export const getCurrentUser = () => {
 };
 // ✅ Export for Navbar auth state tracking
 export { auth, db, onAuthStateChanged };
+export { app };

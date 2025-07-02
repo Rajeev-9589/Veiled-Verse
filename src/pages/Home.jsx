@@ -444,7 +444,7 @@ const HomeComponent = () => {
             </div>
           ) : (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {featuredStories.map((story, index) => (
+              {featuredStories.filter(story => story.status === 'approved').map((story, index) => (
                 <motion.div
                   key={story.id}
                   initial={{ opacity: 0, y: 20 }}

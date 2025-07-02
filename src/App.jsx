@@ -19,6 +19,7 @@ const StoryPreview = lazy(() => import('./components/Preview'));
 const StoryRead = lazy(() => import('./pages/Storyread'));
 const EnhancedDashboard = lazy(() => import('./pages/EnhancedDashboard'));
 const UpdateRole = lazy(() => import('./pages/UpdateRole'));
+const AdminPanel = lazy(() => import('./pages/AdminPanel'));
 
 // Loading component for Suspense fallback
 const PageLoader = () => (
@@ -77,6 +78,11 @@ function App() {
             <Route path='/update-role' element={
               <PrivateRoute>
                 <UpdateRole />
+              </PrivateRoute>
+            } />
+            <Route path='/admin' element={
+              <PrivateRoute>
+                <AdminPanel />
               </PrivateRoute>
             } />
             

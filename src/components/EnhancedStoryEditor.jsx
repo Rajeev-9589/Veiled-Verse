@@ -262,7 +262,7 @@ const EnhancedStoryEditor = ({ storyId = null, onSave, onPublish }) => {
         isPaid,
         price: isPaid ? Number(price) : 0,
         coverImage,
-        publishStatus: "published",
+        status: "pending",
         wordCount,
         readingTime,
         estimatedEarnings: isPaid ? Math.ceil(wordCount / 100) * 0.1 : 0, // Rough estimate

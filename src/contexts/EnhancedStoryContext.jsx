@@ -25,17 +25,11 @@ export const EnhancedStoryContextProvider = ({ children }) => {
   const { isOnline } = useNetworkStatus();
   // Simple stories fetch - no real-time updates for better performance
   useEffect(() => {
-    const fetchStories = async () => {
+    // Fetch only approved stories for public
+    const fetchApprovedStories = async () => {
       try {
-        const storiesData = await getStories();
+        const storiesData = await getStories(); // This fetches only approved stories
         setStories(storiesData);
-        
-        // Update user stories
-        if (userData?.uid) {
-          const userStoriesData = storiesData.filter(story => story.authorId === userData.uid);
-          setUserStories(userStoriesData);
-        }
-        
         setLoading(false);
       } catch (error) {
         console.error("Error fetching stories:", error);
@@ -44,7 +38,23 @@ export const EnhancedStoryContextProvider = ({ children }) => {
       }
     };
 
-    fetchStories();
+    // Fetch all stories by the current user (any status)
+    const fetchUserStories = async () => {
+      if (!userData?.uid) {
+        setUserStories([]);
+        return;
+      }
+      try {
+        // Fetch all stories by this user (regardless of status)
+        const allUserStories = await getStories(userData.uid);
+        setUserStories(allUserStories);
+      } catch (error) {
+        console.error("Error fetching user stories:", error);
+      }
+    };
+
+    fetchApprovedStories();
+    fetchUserStories();
   }, [userData?.uid]);
 
   // Fetch purchased stories
@@ -131,7 +141,7 @@ export const EnhancedStoryContextProvider = ({ children }) => {
         ...storyData,
         authorId: userData.uid,
         authorName: userData.name,
-        status: "published",
+        status: "pending",
         views: 0,
         likes: 0,
         purchases: 0,
