@@ -5,7 +5,7 @@ import { addSubscription } from "../../Backend/firestore/subscription";
 import Confetti from "react-confetti";
 import { useNavigate } from "react-router-dom";
 
-const stripePromise = loadStripe("pk_test_12345"); // Replace with real key in production
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const StripePaymentModal = ({ plan, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);

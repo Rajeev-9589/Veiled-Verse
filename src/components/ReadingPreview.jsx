@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { Clock, Heart, Bookmark } from "lucide-react";
 import { db } from "../../Backend/firebase/auth/auth";
 import { doc, getDoc } from "firebase/firestore";
+import { sanitizeHTML } from "../utils/security";
 
 const ReadingPreview = () => {
   const { id } = useParams();

@@ -49,6 +49,7 @@ import {
 import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 import { useEnhancedStory } from "@/contexts/EnhancedStoryContext";
 import { toast } from "sonner";
+import Toolbar from "./Toolbar";
 
 const EnhancedStoryEditor = ({ storyId = null, onSave, onPublish }) => {
   const { userData, hasPermission } = useEnhancedAuth();
@@ -620,105 +621,7 @@ const EnhancedStoryEditor = ({ storyId = null, onSave, onPublish }) => {
               {/* Toolbar */}
               <Card className="bg-white/90 shadow-lg">
                 <CardContent className="p-4">
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant={editor.isActive("bold") ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => editor.chain().focus().toggleBold().run()}
-                    >
-                      <Bold className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant={
-                        editor.isActive("italic") ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() =>
-                        editor.chain().focus().toggleItalic().run()
-                      }
-                    >
-                      <Italic className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant={
-                        editor.isActive("underline") ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() =>
-                        editor.chain().focus().toggleUnderline().run()
-                      }
-                    >
-                      <UnderlineIcon className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant={editor.isActive("code") ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => editor.chain().focus().toggleCode().run()}
-                    >
-                      <Code className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant={
-                        editor.isActive("bulletList") ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() =>
-                        editor.chain().focus().toggleBulletList().run()
-                      }
-                    >
-                      <List className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant={
-                        editor.isActive("orderedList") ? "default" : "outline"
-                      }
-                      size="sm"
-                      onClick={() =>
-                        editor.chain().focus().toggleOrderedList().run()
-                      }
-                    >
-                      <ListOrdered className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant={
-                        editor.isActive({ textAlign: "left" })
-                          ? "default"
-                          : "outline"
-                      }
-                      size="sm"
-                      onClick={() =>
-                        editor.chain().focus().setTextAlign("left").run()
-                      }
-                    >
-                      <AlignLeft className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant={
-                        editor.isActive({ textAlign: "center" })
-                          ? "default"
-                          : "outline"
-                      }
-                      size="sm"
-                      onClick={() =>
-                        editor.chain().focus().setTextAlign("center").run()
-                      }
-                    >
-                      <AlignCenter className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant={
-                        editor.isActive({ textAlign: "right" })
-                          ? "default"
-                          : "outline"
-                      }
-                      size="sm"
-                      onClick={() =>
-                        editor.chain().focus().setTextAlign("right").run()
-                      }
-                    >
-                      <AlignRight className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <Toolbar editor={editor} />
                 </CardContent>
               </Card>
 

@@ -4,6 +4,7 @@ import StripePaymentModal from "@/components/StripePaymentModal";
 import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 import { addSubscription } from "../../Backend/firestore/subscription";
 import { format } from "date-fns";
+import { toast } from "react-hot-toast";
 
 const plans = [
   {
@@ -40,7 +41,7 @@ const Subscription = () => {
 
   const handlePlanSelect = (plan) => {
     if (!user) {
-      alert("Please log in to subscribe");
+      toast.error("Please log in to subscribe");
       navigate("/login");
       return;
     }
@@ -91,7 +92,7 @@ const Subscription = () => {
       });
     } catch (error) {
       console.error("Error updating subscription:", error);
-      alert("Failed to update subscription");
+      toast.error("Failed to update subscription");
     }
   };
 

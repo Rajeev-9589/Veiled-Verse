@@ -33,6 +33,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import veiledVerseImg from "../assets/ankaheeverse.png";
+import { toast } from "sonner";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const Marketplace = () => {
   const { stories, buyStory, purchasedStories } = useEnhancedStory();
@@ -41,7 +43,9 @@ const Marketplace = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [selectedStory, setSelectedStory] = useState(null);
   const { userData, loading: authLoading } = useEnhancedAuth();
+  const [storyTab, setStoryTab] = useState("paid");
 
+  const freeStories = stories.filter((story) => !story.isPaid);
   const paidStories = stories.filter((story) => story.isPaid);
 
   const genres = [
@@ -95,12 +99,12 @@ const Marketplace = () => {
 
   const handleBuyStory = async (story) => {
     if (!userData) {
-      alert("Please log in to purchase stories");
+      toast.error("Please log in to purchase stories");
       return;
     }
 
     if (purchasedStories.includes(story.id)) {
-      alert("You already own this story!");
+      toast.error("You already own this story!");
       return;
     }
 
@@ -115,7 +119,7 @@ const Marketplace = () => {
       setSelectedStory(null);
     } catch (error) {
       console.error("Purchase failed:", error);
-      alert("Purchase failed. Please try again.");
+      toast.error("Purchase failed. Please try again.");
     }
   };
 
@@ -234,150 +238,307 @@ const Marketplace = () => {
           </div>
         </motion.div>
 
-        {/* Stories Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <AnimatePresence>
-            {filteredStories.map((story, index) => (
-              <motion.div
-                key={story.id}
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                transition={{
-                  delay: index * 0.05,
-                  duration: 0.3,
-                  type: "spring",
-                  stiffness: 100,
-                }}
-                whileHover={{
-                  scale: 1.02,
-                  transition: { duration: 0.2 },
-                }}
-                className="group"
-              >
-                <Card className="bg-white/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 h-full border-0 overflow-hidden">
-                  {/* Cover Image */}
-                  <div className="relative h-48 w-full bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden flex items-center justify-center">
-                    <img
-                      src={story.coverImage || veiledVerseImg}
-                      alt={story.title + " cover"}
-                      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
-                      onError={e => { e.target.onerror = null; e.target.src = veiledVerseImg; }}
-                    />
-                  </div>
-                  <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
-                      <Badge
-                        variant="destructive"
-                        className="mb-2 font-semibold"
-                      >
-                        ₹{story.price}
-                      </Badge>
-                      {purchasedStories.includes(story.id) && (
-                        <Badge
-                          variant="secondary"
-                          className="bg-green-100 text-green-800"
-                        >
-                          <BookOpen className="w-3 h-3 mr-1" />
-                          Owned
-                        </Badge>
-                      )}
-                    </div>
-                  </CardHeader>
+        {/* Tab Switcher and Stories Grid */}
+        <Tabs value={storyTab} onValueChange={setStoryTab} className="mb-8">
+          <TabsList>
+            <TabsTrigger value="paid">Paid Stories</TabsTrigger>
+            <TabsTrigger value="free">Free Stories</TabsTrigger>
+          </TabsList>
+          <TabsContent value="paid">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <AnimatePresence>
+                {filteredStories.map((story, index) =>
+                  story.isPaid ? (
+                    <motion.div
+                      key={story.id}
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                      transition={{
+                        delay: index * 0.05,
+                        duration: 0.3,
+                        type: "spring",
+                        stiffness: 100,
+                      }}
+                      whileHover={{
+                        scale: 1.02,
+                        transition: { duration: 0.2 },
+                      }}
+                      className="group h-full"
+                    >
+                      <Card className="bg-white/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 h-full border-0 overflow-hidden flex flex-col">
+                        {/* Cover Image */}
+                        <div className="relative h-48 w-full bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden flex items-center justify-center">
+                          <img
+                            src={story.coverImage || veiledVerseImg}
+                            alt={story.title + " cover"}
+                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                            onError={e => { e.target.onerror = null; e.target.src = veiledVerseImg; }}
+                          />
+                        </div>
+                        <CardHeader className="pb-3">
+                          <div className="flex justify-between items-start">
+                            <Badge
+                              variant="destructive"
+                              className="mb-2 font-semibold"
+                            >
+                              ₹{story.price}
+                            </Badge>
+                            {purchasedStories.includes(story.id) && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-green-100 text-green-800"
+                              >
+                                <BookOpen className="w-3 h-3 mr-1" />
+                                Owned
+                              </Badge>
+                            )}
+                          </div>
+                        </CardHeader>
 
-                  <CardContent className="p-6 pt-0 h-full flex flex-col">
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-purple-600 transition-colors">
-                      {story.title}
-                    </h3>
+                        <CardContent className="p-6 pt-0 flex flex-col flex-1 min-h-0">
+                          <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-purple-600 transition-colors break-words">
+                            {story.title}
+                          </h3>
 
-                    <p className="text-sm text-gray-600 mb-4 flex-grow line-clamp-3 leading-relaxed">
-                      {story.description ||
-                        "A captivating story waiting to be discovered..."}
-                    </p>
+                          <p className="text-sm text-gray-600 mb-4 flex-grow line-clamp-3 leading-relaxed break-words">
+                            {story.description ||
+                              "A captivating story waiting to be discovered..."}
+                          </p>
 
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <Badge variant="outline" className="text-xs font-medium">
-                        {story.genre || "General"}
-                      </Badge>
-                      {story.tags?.slice(0, 2).map((tag, tagIndex) => (
-                        <Badge
-                          key={tagIndex}
-                          variant="secondary"
-                          className="text-xs"
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            <Badge variant="outline" className="text-xs font-medium">
+                              {story.genre || "General"}
+                            </Badge>
+                            {story.tags?.slice(0, 2).map((tag, tagIndex) => (
+                              <Badge
+                                key={tagIndex}
+                                variant="secondary"
+                                className="text-xs"
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
 
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                      <span className="font-medium">
-                        By {story.authorName || "Anonymous"}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="font-semibold">
-                          {story.averageRating?.toFixed(1) || 0}
-                        </span>
-                      </div>
-                    </div>
+                          <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span className="font-medium">
+                              By {story.authorName || "Anonymous"}
+                            </span>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                              <span className="font-semibold">
+                                {story.averageRating?.toFixed(1) || 0}
+                              </span>
+                            </div>
+                          </div>
 
-                    <div className="flex items-center gap-4 text-xs text-gray-500 mb-6">
-                      <div className="flex items-center gap-1">
-                        <Eye className="w-3 h-3" />
-                        <span>{story.views || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Heart className="w-3 h-3" />
-                        <span>{story.likes || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="w-3 h-3" />
-                        <span>{story.purchases || 0}</span>
-                      </div>
-                    </div>
+                          <div className="flex items-center gap-4 text-xs text-gray-500 mb-6">
+                            <div className="flex items-center gap-1">
+                              <Eye className="w-3 h-3" />
+                              <span>{story.views || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Heart className="w-3 h-3" />
+                              <span>{story.likes || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <TrendingUp className="w-3 h-3" />
+                              <span>{story.purchases || 0}</span>
+                            </div>
+                          </div>
 
-                    <div className="flex gap-2 mt-auto">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 h-10 font-medium"
-                        asChild
-                      >
-                        <Link to={`/read/${story.id}`}>
-                          <BookOpen className="w-4 h-4 mr-2" />
-                          Preview
-                        </Link>
-                      </Button>
+                          <div className="flex gap-2 mt-auto">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-10 font-medium"
+                              asChild
+                            >
+                              <Link to={`/preview/${story.id}`}>
+                                <BookOpen className="w-4 h-4 mr-2" />
+                                Preview
+                              </Link>
+                            </Button>
 
-                      {purchasedStories.includes(story.id) ? (
-                        <Button
-                          size="sm"
-                          className="flex-1 h-10 font-medium bg-green-600 hover:bg-green-700"
-                          asChild
-                        >
-                          <Link to={`/read/${story.id}`}>
-                            <BookOpen className="w-4 h-4 mr-2" />
-                            Read
-                          </Link>
-                        </Button>
-                      ) : (
-                        <Button
-                          size="sm"
-                          className="flex-1 h-10 font-medium bg-purple-600 hover:bg-purple-700"
-                          onClick={() => handleBuyStory(story)}
-                        >
-                          <ShoppingCart className="w-4 h-4 mr-2" />
-                          Buy
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
+                            {userData && purchasedStories.includes(story.id) ? (
+                              <Button
+                                size="sm"
+                                className="flex-1 h-10 font-medium bg-green-600 hover:bg-green-700"
+                                asChild
+                              >
+                                <Link to={`/read/${story.id}`}>
+                                  <BookOpen className="w-4 h-4 mr-2" />
+                                  Read
+                                </Link>
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                className="flex-1 h-10 font-medium bg-purple-600 hover:bg-purple-700"
+                                onClick={() => handleBuyStory(story)}
+                              >
+                                <ShoppingCart className="w-4 h-4 mr-2" />
+                                Buy
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ) : null
+                )}
+              </AnimatePresence>
+            </div>
+          </TabsContent>
+          <TabsContent value="free">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <AnimatePresence>
+                {stories
+                  .filter((story) => !story.isPaid)
+                  .map((story, index) => (
+                    <motion.div
+                      key={story.id}
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                      transition={{
+                        delay: index * 0.05,
+                        duration: 0.3,
+                        type: "spring",
+                        stiffness: 100,
+                      }}
+                      whileHover={{
+                        scale: 1.02,
+                        transition: { duration: 0.2 },
+                      }}
+                      className="group h-full"
+                    >
+                      <Card className="bg-white/90 backdrop-blur-md shadow-lg hover:shadow-xl transition-all duration-300 h-full border-0 overflow-hidden flex flex-col">
+                        {/* Cover Image */}
+                        <div className="relative h-48 w-full bg-gradient-to-br from-purple-100 to-pink-100 overflow-hidden flex items-center justify-center">
+                          <img
+                            src={story.coverImage || veiledVerseImg}
+                            alt={story.title + " cover"}
+                            className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                            onError={e => { e.target.onerror = null; e.target.src = veiledVerseImg; }}
+                          />
+                        </div>
+                        <CardHeader className="pb-3">
+                          <div className="flex justify-between items-start">
+                            <Badge
+                              variant="destructive"
+                              className="mb-2 font-semibold"
+                            >
+                              ₹{story.price}
+                            </Badge>
+                            {purchasedStories.includes(story.id) && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-green-100 text-green-800"
+                              >
+                                <BookOpen className="w-3 h-3 mr-1" />
+                                Owned
+                              </Badge>
+                            )}
+                          </div>
+                        </CardHeader>
+
+                        <CardContent className="p-6 pt-0 flex flex-col flex-1 min-h-0">
+                          <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-purple-600 transition-colors break-words">
+                            {story.title}
+                          </h3>
+
+                          <p className="text-sm text-gray-600 mb-4 flex-grow line-clamp-3 leading-relaxed break-words">
+                            {story.description ||
+                              "A captivating story waiting to be discovered..."}
+                          </p>
+
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            <Badge variant="outline" className="text-xs font-medium">
+                              {story.genre || "General"}
+                            </Badge>
+                            {story.tags?.slice(0, 2).map((tag, tagIndex) => (
+                              <Badge
+                                key={tagIndex}
+                                variant="secondary"
+                                className="text-xs"
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+
+                          <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span className="font-medium">
+                              By {story.authorName || "Anonymous"}
+                            </span>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                              <span className="font-semibold">
+                                {story.averageRating?.toFixed(1) || 0}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4 text-xs text-gray-500 mb-6">
+                            <div className="flex items-center gap-1">
+                              <Eye className="w-3 h-3" />
+                              <span>{story.views || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Heart className="w-3 h-3" />
+                              <span>{story.likes || 0}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <TrendingUp className="w-3 h-3" />
+                              <span>{story.purchases || 0}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2 mt-auto">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 h-10 font-medium"
+                              asChild
+                            >
+                              <Link to={`/read/${story.id}`}>
+                                <BookOpen className="w-4 h-4 mr-2" />
+                                Preview
+                              </Link>
+                            </Button>
+
+                            {userData && purchasedStories.includes(story.id) ? (
+                              <Button
+                                size="sm"
+                                className="flex-1 h-10 font-medium bg-green-600 hover:bg-green-700"
+                                asChild
+                              >
+                                <Link to={`/read/${story.id}`}>
+                                  <BookOpen className="w-4 h-4 mr-2" />
+                                  Read
+                                </Link>
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                className="flex-1 h-10 font-medium bg-purple-600 hover:bg-purple-700"
+                                onClick={() => handleBuyStory(story)}
+                              >
+                                <ShoppingCart className="w-4 h-4 mr-2" />
+                                Buy
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+              </AnimatePresence>
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {filteredStories.length === 0 && (
           <motion.div

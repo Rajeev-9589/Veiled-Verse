@@ -1,33 +1,50 @@
 // src/pages/UpdateRole.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../../Backend/firebase/auth/auth";
 import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const UpdateRole = () => {
   const { user, userData, updateUserData } = useEnhancedAuth();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!user) {
+      toast.error("Please log in first.");
+      navigate("/login");
+      return;
+    }
+  }, [user, navigate]);
 
   const handleBecomeWriter = async () => {
-    if (!user) return alert("Please log in first.");
+    if (!user) return;
+
+    setLoading(true);
     try {
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         roles: userData?.roles?.includes("writer")
           ? userData.roles
           : [...(userData?.roles || []), "writer"],
+        updatedAt: new Date(),
       });
-      updateUserData({
+      await updateUserData({
         roles: [...(userData?.roles || []), "writer"],
       });
-      alert("You're now a Writer!");
-      navigate("/write");
-    } catch (err) {
-      console.error("Error updating role:", err);
-      alert("Something went wrong.");
+      toast.success("You're now a Writer!");
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Error updating role:", error);
+      toast.error("Something went wrong.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,9 +59,9 @@ const UpdateRole = () => {
       </h1>
       <p className="text-lg text-gray-700 mb-8 max-w-md">
         Upgrade your profile to become a <strong>Writer</strong> and start
-        publishing your own stories on AnkaheeVerse.
+        publishing your own stories on Veiled Verse.
       </p>
-      <Button onClick={handleBecomeWriter} size="lg">
+      <Button onClick={handleBecomeWriter} size="lg" disabled={loading}>
         Become a Writer 🚀
       </Button>
     </motion.div>

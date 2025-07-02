@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useEnhancedStory } from "@/contexts/EnhancedStoryContext";
+import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,8 @@ import {
   TrendingUp,
   Sparkles,
 } from "lucide-react";
+import { handleShare } from '@/lib/utils';
+import { toast } from 'sonner';
 
 // Subcomponent: StoryStats
 const StoryStats = React.memo(({ story }) => (
@@ -122,8 +125,9 @@ const RatingModal = ({ open, onClose, onRate, userRating, storyTitle }) => (
 
 const Preview = () => {
   const { id } = useParams();
-  const { stories, likeStory, rateStory, canReadStory, buyStory } =
+  const { stories, likeStory, rateStory, canReadStory, buyStory, purchasedStories } =
     useEnhancedStory();
+  const { userData } = useEnhancedAuth();
   const [story, setStory] = useState(null);
   const [userRating, setUserRating] = useState(0);
   const [showRating, setShowRating] = useState(false);
@@ -139,7 +143,8 @@ const Preview = () => {
     }
   }, [id, stories]);
 
-  const canRead = useMemo(() => canReadStory(story), [story, canReadStory]);
+  const hasAccess = story && canReadStory(story);
+  const isPurchased = story && purchasedStories && purchasedStories.includes(story.id);
 
   const handleLike = useCallback(async () => {
     setLikeLoading(true);
@@ -157,13 +162,28 @@ const Preview = () => {
     [rateStory, story],
   );
 
-  const handleBuy = useCallback(async () => {
-    if (story.isPaid) {
-      setBuyLoading(true);
-      await buyStory(story.id, story.price);
-      setBuyLoading(false);
+  const handleBuy = async () => {
+    if (!userData) return;
+    setBuyLoading(true);
+    await buyStory(story.id, story.price);
+    setBuyLoading(false);
+  };
+
+  const onShare = async () => {
+    const url = `${window.location.origin}/preview/${story.id}`;
+    const result = await handleShare({
+      title: story.title,
+      text: story.description,
+      url,
+    });
+    if (result.success) {
+      if (result.method === 'clipboard') {
+        toast.success('Link copied to clipboard!');
+      }
+    } else {
+      toast.error('Unable to share this story.');
     }
-  }, [buyStory, story]);
+  };
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -297,6 +317,7 @@ const Preview = () => {
                     size="sm"
                     className="gap-2"
                     aria-label="Share story"
+                    onClick={onShare}
                   >
                     <Share2 className="w-4 h-4" aria-hidden="true" />
                     Share
@@ -313,63 +334,30 @@ const Preview = () => {
                 </div>
               </CardContent>
             )}
-          </Card>
-        </motion.div>
-        {/* Story Content */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          {canRead ? (
-            <Card className="bg-white/90 backdrop-blur-md shadow-xl border-0">
-              <CardContent className="p-6 sm:p-8">
-                <div
-                  className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-purple-600 prose-strong:text-gray-900"
-                  dangerouslySetInnerHTML={{ __html: story.content }}
-                  aria-label="Story content"
-                />
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="bg-white/90 backdrop-blur-md shadow-xl border-0">
-              <CardContent className="p-8 text-center">
-                <div className="max-w-md mx-auto">
-                  <div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <ShoppingCart
-                      className="w-10 h-10 text-purple-600"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    Premium Story
-                  </h3>
-                  <p className="text-gray-600 mb-6 leading-relaxed">
-                    Purchase this story to read the full content and support the
-                    author.
-                  </p>
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 mb-6">
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-semibold">Price:</span>
-                      <span className="text-3xl font-bold text-purple-600">
-                        ₹{story.price}
-                      </span>
-                    </div>
-                  </div>
+            <CardContent className="flex flex-col items-center gap-4 pt-6">
+              {story.isPaid && !isPurchased ? (
+                <Button
+                  onClick={handleBuy}
+                  size="lg"
+                  className="bg-purple-600 hover:bg-purple-700 text-lg font-semibold"
+                  disabled={buyLoading}
+                >
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  {buyLoading ? "Processing..." : "Proceed to Buy"}
+                </Button>
+              ) : (
+                <Link to={`/read/${story.id}`} className="w-full">
                   <Button
-                    onClick={handleBuy}
                     size="lg"
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-lg font-semibold"
-                    aria-label="Buy and read story"
-                    disabled={buyLoading}
+                    className="bg-green-600 hover:bg-green-700 text-lg font-semibold w-full"
                   >
-                    <ShoppingCart className="w-5 h-5 mr-2" aria-hidden="true" />
-                    {buyLoading ? "Processing..." : "Buy & Read Now"}
+                    <BookOpen className="w-5 h-5 mr-2" />
+                    Read Full Story
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </Link>
+              )}
+            </CardContent>
+          </Card>
         </motion.div>
         {/* Rating Modal */}
         <RatingModal
