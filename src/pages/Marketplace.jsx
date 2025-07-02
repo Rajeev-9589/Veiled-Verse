@@ -379,7 +379,7 @@ const Marketplace = () => {
                                 onClick={() => handleBuyStory(story)}
                               >
                                 <ShoppingCart className="w-4 h-4 mr-2" />
-                                Buy
+                                Buy (Demo version)
                               </Button>
                             )}
                           </div>
