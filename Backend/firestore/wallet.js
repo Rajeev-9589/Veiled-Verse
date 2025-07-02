@@ -1,5 +1,5 @@
 // firebase/firestore/wallet.js
-import { db } from "../firebase/firebase";
+import { db } from "../firebase/auth/auth";
 import {
   doc,
   getDoc,

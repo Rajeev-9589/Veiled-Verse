@@ -464,7 +464,7 @@ const EnhancedDashboard = () => {
                   <Button
                     variant="outline"
                     className="h-20 flex-col gap-2"
-                    onClick={() => navigate("/enhanced-write")}
+                    onClick={() => navigate("/write")}
                   >
                     <Plus className="h-6 w-6" />
                     <span>New Story</span>

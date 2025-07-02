@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { BookOpen, Bookmark, Clock, Heart, Eye } from "lucide-react";
 import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 import { collection, query, where, getDocs, orderBy, limit, getDoc, doc } from "firebase/firestore";
-import { db } from "../../Backend/firebase/firebase";
+import { db } from "../../Backend/firebase/auth/auth";
 
 const ReaderDashboard = () => {
   const [stats, setStats] = useState({

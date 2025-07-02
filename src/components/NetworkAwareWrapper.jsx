@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import useNetworkStatus from '@/hooks/useNetworkStatus';
 import OfflineFallback from './OfflineFallback';
-import { db } from "../../Backend/firebase/firebase";
+import { db } from "../../Backend/firebase/auth/auth";
 
 const NetworkAwareWrapper = ({ 
   children, 

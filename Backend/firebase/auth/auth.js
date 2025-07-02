@@ -19,14 +19,16 @@ import {
 
 // Your Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyDISaVa08H1axod5trhTV_0O3lAQXCwJ-0",
-  authDomain: "ankaheeverse.firebaseapp.com",
-  projectId: "ankaheeverse",
-  storageBucket: "ankaheeverse.firebasestorage.app",
-  messagingSenderId: "222070237184",
-  appId: "1:222070237184:web:574eef63e3952e0141d0e5",
-  measurementId: "G-440659PR56",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
+
+
 
 // Init Firebase
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
