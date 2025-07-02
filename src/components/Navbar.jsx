@@ -58,6 +58,7 @@ const Navbar = () => {
   };
 
   return (
+    <>
     <motion.nav 
       initial={{ y: -100 }}
       animate={{ y: 0 }}
@@ -336,6 +337,11 @@ const Navbar = () => {
         )}
       </AnimatePresence>
     </motion.nav>
+    <div className="w-full bg-yellow-100 border-b border-yellow-300 text-yellow-900 text-sm sm:text-base px-4 py-2 text-center font-medium shadow-md z-30">
+  ⏳ <span className="font-semibold">Note:</span> Publishing requires a short approval time (approx. 1 hour) for content review to ensure no vulgarities are published. 🛡️ Buying is currently in <span className="underline decoration-dotted decoration-yellow-600">demo mode</span> — feel free to login, explore and hit <strong>Buy</strong>! 🛒✨ <span className="block sm:inline mt-1 sm:mt-0">— <span className="italic text-yellow-800">crafted by Rajeev</span> ❤️</span>
+</div>
+
+  </>
   );
 };
 

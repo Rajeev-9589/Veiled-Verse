@@ -7,6 +7,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import PrivateRoute from './Routes/PrivateRoute';
 import LoadingSpinner from './components/LoadingSpinner';
 import OfflineIndicator from './components/OfflineIndicator';
+import BookExplorer from './components/Canwedo/BookExplorer';
 
 // Lazy load components for better performance
 const Home = lazy(() => import('./pages/Home'));
@@ -59,6 +60,10 @@ function App() {
             <Route path='/read/:id' element={<StoryRead />} />
             <Route path='/preview/:id' element={<StoryPreview />} />
     
+
+            <Route path='/explorer/book' element={<BookExplorer />} />
+
+
 
             <Route path='/dashboard' element={
               <PrivateRoute>
