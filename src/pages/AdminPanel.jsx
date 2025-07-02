@@ -90,6 +90,14 @@ const AdminPanel = () => {
                   >
                     {actionLoading === story.id + 'remove' ? 'Removing...' : 'Remove'}
                   </button>
+                ) : story.status === 'rejected' ? (
+                  <button
+                    onClick={() => handleRemove(story.id)}
+                    className={`bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ${actionLoading === story.id + 'remove' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={actionLoading === story.id + 'remove'}
+                  >
+                    {actionLoading === story.id + 'remove' ? 'Removing...' : 'Remove'}
+                  </button>
                 ) : (
                   <>
                     <button
