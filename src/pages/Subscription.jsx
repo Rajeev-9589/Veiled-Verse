@@ -4,7 +4,7 @@ import StripePaymentModal from "@/components/StripePaymentModal";
 import { useEnhancedAuth } from "@/contexts/EnhancedAuthContext";
 import { addSubscription } from "../../Backend/firestore/subscription";
 import { format } from "date-fns";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 
 const plans = [
   {
