@@ -3,12 +3,14 @@ import { useEnhancedAuth } from '@/contexts/EnhancedAuthContext';
 import { toast } from 'sonner';
 import { getFirestore, collection, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { app } from '../../Backend/firebase/auth/auth';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const AdminPanel = () => {
   const { hasPermission } = useEnhancedAuth();
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
+  const [reviewStory, setReviewStory] = useState(null);
   const db = getFirestore(app);
 
   useEffect(() => {
@@ -116,11 +118,55 @@ const AdminPanel = () => {
                     </button>
                   </>
                 )}
+                <button
+                  onClick={() => setReviewStory(story)}
+                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                >
+                  Review
+                </button>
               </div>
             </div>
           ))}
         </div>
       )}
+      <Dialog open={!!reviewStory} onOpenChange={() => setReviewStory(null)}>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden">
+          <DialogHeader className="border-b px-6 pt-6 pb-3 flex flex-row items-center justify-between">
+            <DialogTitle className="text-2xl font-bold">Review Story</DialogTitle>
+            <button
+              onClick={() => setReviewStory(null)}
+              className="ml-auto text-gray-400 hover:text-red-500 text-2xl font-bold focus:outline-none"
+              aria-label="Close"
+            >
+              ×
+            </button>
+          </DialogHeader>
+          {reviewStory && (
+            <div className="px-6 py-4 max-h-[70vh] overflow-y-auto space-y-4">
+              <div>
+                <h2 className="text-xl font-bold mb-1 text-purple-700">{reviewStory.title}</h2>
+                <p className="text-gray-500 mb-2 text-sm">By: <span className="font-semibold">{reviewStory.authorName || reviewStory.authorId}</span></p>
+                <p className="text-gray-700 mb-4 italic">{reviewStory.description}</p>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2 text-pink-600">Story Content</h3>
+                <div className="prose prose-p:my-2 prose-h1:my-2 prose-h2:my-2 prose-h3:my-2 max-w-none bg-gray-50 rounded-lg p-4 shadow-inner border overflow-x-auto" style={{ minHeight: 120 }} dangerouslySetInnerHTML={{ __html: reviewStory.content }} />
+              </div>
+              {reviewStory.status !== 'approved' && (
+                <button
+                  onClick={async () => {
+                    await handleStatus(reviewStory.id, 'approved');
+                    setReviewStory(null);
+                  }}
+                  className="mt-4 bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded shadow"
+                >
+                  Approve
+                </button>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
