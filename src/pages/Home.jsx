@@ -562,7 +562,47 @@ const HomeComponent = () => {
             </div>
           </div>
         </motion.div>
+        {/* GitHub Repository Card */}
+        <motion.div
+          className="mb-24"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
+          <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all max-w-4xl mx-auto text-center p-8">
+            <CardHeader>
+              <div className="flex justify-center mb-4">
+                <img
+                  src="https://cdn-icons-png.flaticon.com/512/25/25231.png"
+                  alt="GitHub Logo"
+                  className="w-12 h-12"
+                />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-800 mb-2">
+                Open Source on GitHub
+              </h3>
+              <p className="text-gray-600 text-base mb-4">
+                Check out the source code of Veiled Verse and contribute to the future of storytelling.
+              </p>
+              <Button
+                asChild
+                className="bg-black text-white hover:bg-gray-800 px-6 py-3"
+              >
+                <a
+                  href="https://github.com/Rajeev-9589/Veiled-Verse"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Visit Repository
+                </a>
+              </Button>
+            </CardHeader>
+          </Card>
+        </motion.div>
+
       </div>
+
     </div>
   );
 };
